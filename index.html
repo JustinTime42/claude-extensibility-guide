@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Extensibility Mastery Guide</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-orange: #f97316;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --border-color: #475569;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+        h2 {
+            color: var(--accent-blue);
+            font-size: 1.8rem;
+            margin: 2.5rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        h3 {
+            color: var(--accent-green);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.75rem;
+        }
+        h4 {
+            color: var(--accent-purple);
+            font-size: 1.1rem;
+            margin: 1.25rem 0 0.5rem;
+        }
+        p { margin-bottom: 1rem; color: var(--text-secondary); }
+        .toc {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        .toc h3 { margin-top: 0; color: var(--text-primary); }
+        .toc ul { list-style: none; }
+        .toc li { padding: 0.25rem 0; }
+        .toc a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .toc a:hover { color: var(--accent-orange); }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .feature-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .feature-card h4 { margin-top: 0; }
+        .feature-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        pre {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+        }
+        code {
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.9rem;
+        }
+        :not(pre) > code {
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: var(--accent-orange);
+        }
+        .callout {
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-left: 4px solid;
+        }
+        .callout-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--accent-blue);
+        }
+        .callout-tip {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--accent-green);
+        }
+        .callout-warning {
+            background: rgba(249, 115, 22, 0.1);
+            border-color: var(--accent-orange);
+        }
+        .callout-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .workflow-step {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+        .workflow-step::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--accent-purple);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .limitation {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .solution {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .file-tree {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+        }
+        .file-tree .dir { color: var(--accent-blue); }
+        .file-tree .file { color: var(--text-secondary); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        td { color: var(--text-secondary); }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-auto { background: var(--accent-green); color: white; }
+        .badge-manual { background: var(--accent-blue); color: white; }
+        .badge-hybrid { background: var(--accent-purple); color: white; }
+    </style>
+</head>
+<body>
+    <h1>Claude Code Extensibility Mastery Guide</h1>
+    <p class="subtitle">Skills, Tools, Subagents, Commands, Hooks, MCP Servers & Plugins — A Complete Deep-Dive with Progressive Workflow Examples</p>
+
+    <div class="toc">
+        <h3>📑 Table of Contents</h3>
+        <ul>
+            <li><a href="#overview">1. Overview: The Extensibility Ecosystem</a></li>
+            <li><a href="#features">2. Feature Deep-Dive</a>
+                <ul>
+                    <li><a href="#claudemd">2.1 CLAUDE.md — Project Memory</a></li>
+                    <li><a href="#commands">2.2 Slash Commands — Manual Triggers</a></li>
+                    <li><a href="#skills">2.3 Skills — Auto-Invoked Capabilities</a></li>
+                    <li><a href="#subagents">2.4 Subagents — Isolated Specialists</a></li>
+                    <li><a href="#hooks">2.5 Hooks — Lifecycle Automation</a></li>
+                    <li><a href="#mcp">2.6 MCP Servers — External Tool Integration</a></li>
+                    <li><a href="#plugins">2.7 Plugins — Bundled Distribution</a></li>
+                </ul>
+            </li>
+            <li><a href="#comparison">3. Feature Comparison Matrix</a></li>
+            <li><a href="#workflow">4. Progressive Workflow Example: Building a Production-Ready Feature Pipeline</a></li>
+            <li><a href="#advanced">5. Advanced Patterns & Best Practices</a></li>
+            <li><a href="#resources">6. Resources & Next Steps</a></li>
+        </ul>
+    </div>
+
+    <h2 id="overview">1. Overview: The Extensibility Ecosystem</h2>
+    
+    <p>Claude Code isn't just a coding assistant—it's a fully extensible <strong>agent orchestration framework</strong>. Understanding its extensibility features transforms Claude from a helpful chatbot into a deterministic, repeatable engineering system.</p>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="icon">📝</div>
+            <h4>CLAUDE.md</h4>
+            <p>Persistent project memory loaded at every session. Your project's DNA.</p>
+            <span class="badge badge-auto">Auto-loaded</span>
+        </div>
+        <div class="feature-card">
+            <div class="icon">⚡</div>
+            <h4>Slash Commands</h4>
+            <p>User-triggered workflows via <code>/command</code> syntax.</p>
+            <span class="badge badge-manual">Manual</span>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🧠</div>
+            <h4>Skills</h4>
+            <p>Auto-invoked context that Claude loads when relevant to the task.</p>
+            <span class="badge badge-auto">Auto-invoked</span>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🤖</div>
+            <h4>Subagents</h4>
+            <p>Specialized AI assistants with isolated context windows.</p>
+            <span class="badge badge-hybrid">Hybrid</span>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🪝</div>
+            <h4>Hooks</h4>
+            <p>Lifecycle event handlers (PreToolUse, PostToolUse, Stop, etc.).</p>
+            <span class="badge badge-auto">Automatic</span>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🔌</div>
+            <h4>MCP Servers</h4>
+            <p>External tool connections (GitHub, Slack, databases, etc.).</p>
+            <span class="badge badge-manual">Configured</span>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📦</div>
+            <h4>Plugins</h4>
+            <p>Bundled packages of commands, agents, hooks & MCP servers.</p>
+            <span class="badge badge-manual">Installable</span>
+        </div>
+    </div>
+
+    <div class="callout callout-info">
+        <div class="callout-title">💡 Key Insight</div>
+        <p>These features stack together as a cohesive system. CLAUDE.md provides baseline context → Skills add on-demand expertise → Subagents handle isolated work → Commands trigger explicit workflows → Hooks automate lifecycle events → MCP connects external services → Plugins bundle everything for distribution.</p>
+    </div>
+
+    <h2 id="features">2. Feature Deep-Dive</h2>
+
+    <h3 id="claudemd">2.1 CLAUDE.md — Project Memory</h3>
+
+    <p>CLAUDE.md files are markdown documents that Claude automatically loads at session start. They serve as persistent memory for project conventions, coding standards, and frequently-used commands.</p>
+
+    <h4>Memory Hierarchy (in order of precedence)</h4>
+    <table>
+        <tr>
+            <th>Location</th>
+            <th>Scope</th>
+            <th>Use Case</th>
+        </tr>
+        <tr>
+            <td><code>~/.claude/CLAUDE.md</code></td>
+            <td>User (global)</td>
+            <td>Personal preferences across all projects</td>
+        </tr>
+        <tr>
+            <td><code>./CLAUDE.md</code></td>
+            <td>Project</td>
+            <td>Team-shared project conventions (version controlled)</td>
+        </tr>
+        <tr>
+            <td><code>./.claude/CLAUDE.md</code></td>
+            <td>Project (alternate)</td>
+            <td>Same as above, organized in .claude folder</td>
+        </tr>
+        <tr>
+            <td><code>./CLAUDE.local.md</code></td>
+            <td>Local (gitignored)</td>
+            <td>Personal project preferences not shared with team</td>
+        </tr>
+        <tr>
+            <td><code>./.claude/rules/*.md</code></td>
+            <td>Project rules</td>
+            <td>Modular, organized rule files for large projects</td>
+        </tr>
+    </table>
+
+    <h4>Example: Project CLAUDE.md</h4>
+    <pre><code># DevJourney.ai - Development Guide
+
+## Project Overview
+DevJourney.ai helps developers create LinkedIn posts from coding progress.
+Tech stack: Next.js 14, TypeScript, Prisma, PostgreSQL, TailwindCSS
+
+## Commands
+- `pnpm dev` - Start development server
+- `pnpm test` - Run test suite
+- `pnpm db:push` - Push Prisma schema changes
+- `pnpm lint` - Run ESLint
+
+## Code Conventions
+- Use TypeScript strict mode
+- Prefer server components; use 'use client' only when necessary
+- Error handling: Always use try-catch with typed errors
+- File naming: kebab-case for files, PascalCase for components
+
+## Architecture
+- `/app` - Next.js app router pages
+- `/components` - Reusable UI components
+- `/lib` - Utility functions and shared logic
+- `/prisma` - Database schema and migrations
+
+## Important Notes
+- NEVER commit API keys; use environment variables
+- Always run tests before pushing to main
+- Use conventional commits: feat:, fix:, docs:, etc.</code></pre>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">✅ Best Practice: Keep It Lean</div>
+        <p>CLAUDE.md consumes context window space. Include only what's needed in <em>every</em> session. For ad-hoc reference material, use <code>@docs/filename.md</code> imports or put detailed docs in a <code>docs/</code> folder.</p>
+    </div>
+
+    <h4>Importing External Files</h4>
+    <pre><code># In CLAUDE.md
+See @README.md for project overview
+See @docs/api-conventions.md for API patterns
+See @package.json for available npm scripts</code></pre>
+
+    <h3 id="commands">2.2 Slash Commands — Manual Triggers</h3>
+
+    <p>Slash commands are user-triggered workflows invoked via <code>/command-name</code>. They're ideal for repeatable tasks you want explicit control over.</p>
+
+    <h4>Command Structure</h4>
+    <div class="file-tree">
+        <span class="dir">.claude/</span>
+        <br>└── <span class="dir">commands/</span>
+        <br>    ├── <span class="file">pr-review.md</span>
+        <br>    ├── <span class="file">onboard.md</span>
+        <br>    └── <span class="file">deploy.md</span>
+    </div>
+
+    <h4>Example: /pr-review Command</h4>
+    <pre><code>---
+description: Review the current PR for code quality and best practices
+allowed-tools: Read, Grep, Glob, Bash(git *)
+---
+
+# PR Review Workflow
+
+## Steps
+1. Get the current branch: `git branch --show-current`
+2. Get the diff against main: `git diff main...HEAD`
+3. Identify changed files and their types
+4. For each file, check:
+   - Code style consistency
+   - Error handling completeness
+   - Type safety (no `any` types)
+   - Test coverage for new functions
+   - Security considerations
+
+## Output Format
+Provide a structured review with:
+- **Summary**: One-paragraph overview
+- **Issues**: Numbered list of concerns (critical/warning/info)
+- **Suggestions**: Improvement recommendations
+- **Approval Status**: Ready/Needs Changes</code></pre>
+
+    <h4>Passing Arguments</h4>
+    <p>Commands can accept arguments via the <code>$ARGUMENTS</code> placeholder:</p>
+    <pre><code>---
+description: Fix a GitHub issue by number
+---
+
+Fix GitHub issue $ARGUMENTS following our coding standards.
+1. Read the issue details
+2. Understand the requirements
+3. Implement the fix
+4. Write tests
+5. Create a descriptive commit</code></pre>
+    <p>Usage: <code>/fix-issue 42</code></p>
+
+    <h3 id="skills">2.3 Skills — Auto-Invoked Capabilities</h3>
+
+    <p>Skills are modular capabilities that Claude <strong>automatically</strong> loads when relevant to the conversation. Think of them as chunks of a CLAUDE.md file that only activate when needed, saving context window space.</p>
+
+    <div class="callout callout-info">
+        <div class="callout-title">Skills vs Commands</div>
+        <p><strong>Commands:</strong> You invoke explicitly via <code>/command</code><br>
+        <strong>Skills:</strong> Claude invokes automatically when the task matches the skill's description</p>
+    </div>
+
+    <h4>Skill Structure</h4>
+    <div class="file-tree">
+        <span class="dir">.claude/</span>
+        <br>└── <span class="dir">skills/</span>
+        <br>    └── <span class="dir">api-design/</span>
+        <br>        ├── <span class="file">SKILL.md</span>
+        <br>        ├── <span class="file">patterns.md</span>
+        <br>        └── <span class="file">examples/</span>
+    </div>
+
+    <h4>SKILL.md Frontmatter Options</h4>
+    <table>
+        <tr>
+            <th>Field</th>
+            <th>Purpose</th>
+            <th>Example</th>
+        </tr>
+        <tr>
+            <td><code>name</code></td>
+            <td>Skill identifier (kebab-case)</td>
+            <td><code>api-design</code></td>
+        </tr>
+        <tr>
+            <td><code>description</code></td>
+            <td>When to invoke (Claude uses this for matching)</td>
+            <td>"REST API design patterns"</td>
+        </tr>
+        <tr>
+            <td><code>allowed-tools</code></td>
+            <td>Limit available tools</td>
+            <td><code>Read, Grep, Glob</code></td>
+        </tr>
+        <tr>
+            <td><code>context</code></td>
+            <td>Execution mode</td>
+            <td><code>fork</code> (runs in subagent)</td>
+        </tr>
+        <tr>
+            <td><code>agent</code></td>
+            <td>Which agent to use with <code>context: fork</code></td>
+            <td><code>Explore</code>, <code>Plan</code>, custom</td>
+        </tr>
+        <tr>
+            <td><code>disable-model-invocation</code></td>
+            <td>Only manual invocation via <code>/skill-name</code></td>
+            <td><code>true</code></td>
+        </tr>
+    </table>
+
+    <h4>Example: API Design Skill</h4>
+    <pre><code>---
+name: api-design
+description: REST API design patterns and conventions. Use when creating or reviewing API endpoints, route handlers, or HTTP interfaces.
+allowed-tools: Read, Write, Grep, Glob
+---
+
+# API Design Patterns
+
+## Route Conventions
+- Use plural nouns: `/users`, `/posts`, `/comments`
+- Nest related resources: `/users/:id/posts`
+- Use query params for filtering: `/posts?status=published`
+
+## HTTP Methods
+- GET: Retrieve resources (idempotent)
+- POST: Create new resources
+- PUT: Full replacement
+- PATCH: Partial update
+- DELETE: Remove resources
+
+## Response Format
+```json
+{
+  "data": { ... },
+  "meta": { "page": 1, "total": 100 },
+  "errors": []
+}
+```
+
+## Error Handling
+Always return appropriate status codes:
+- 400: Bad Request (validation errors)
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 500: Internal Server Error
+
+## Reference Files
+See @docs/api-examples.md for concrete implementations</code></pre>
+
+    <h4>Forked Skills (Running in Subagents)</h4>
+    <p>Add <code>context: fork</code> to run a skill in an isolated subagent. The skill content becomes the task prompt:</p>
+    <pre><code>---
+name: deep-research
+description: Thoroughly research a topic across the codebase
+context: fork
+agent: Explore
+---
+
+Research $ARGUMENTS thoroughly:
+1. Find all relevant files using Glob and Grep
+2. Read and analyze the code patterns
+3. Document dependencies and relationships
+4. Summarize findings with specific file references</code></pre>
+
+    <h3 id="subagents">2.4 Subagents — Isolated Specialists</h3>
+
+    <p>Subagents are specialized AI assistants that Claude can delegate tasks to. Each operates in its own <strong>isolated context window</strong>, preventing cross-contamination and keeping the main conversation focused.</p>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">⚠️ Don't Recreate Built-in Agents</div>
+        <p>Claude Code already has <code>Explore</code> (read-only codebase exploration), <code>Plan</code> (architecture planning), and <code>general-purpose</code> agents. Custom subagents should provide <strong>specialized domain expertise</strong> that these don't have—like Prisma migration safety checks, LinkedIn content optimization, or your company's specific security policies.</p>
+    </div>
+
+    <h4>Why Subagents?</h4>
+    <ul style="color: var(--text-secondary); margin-left: 1.5rem; margin-bottom: 1rem;">
+        <li><strong>Context Isolation:</strong> Heavy exploration doesn't pollute your main thread</li>
+        <li><strong>Parallel Execution:</strong> Run multiple agents simultaneously</li>
+        <li><strong>Specialized Expertise:</strong> Custom prompts for specific domains</li>
+        <li><strong>Tool Restrictions:</strong> Limit what tools each agent can use</li>
+        <li><strong>Cost Control:</strong> Route to cheaper models (Haiku) for simple tasks</li>
+    </ul>
+
+    <h4>Built-in Subagents</h4>
+    <table>
+        <tr>
+            <th>Agent</th>
+            <th>Purpose</th>
+            <th>Tools</th>
+        </tr>
+        <tr>
+            <td><code>Explore</code></td>
+            <td>Read-only codebase exploration</td>
+            <td>Read, Grep, Glob</td>
+        </tr>
+        <tr>
+            <td><code>Plan</code></td>
+            <td>Architecture and planning</td>
+            <td>Read, Grep, Glob</td>
+        </tr>
+        <tr>
+            <td><code>general-purpose</code></td>
+            <td>Full capabilities</td>
+            <td>All tools</td>
+        </tr>
+    </table>
+
+    <h4>Creating Custom Subagents</h4>
+    <div class="file-tree">
+        <span class="dir">.claude/</span>
+        <br>└── <span class="dir">agents/</span>
+        <br>    ├── <span class="file">code-reviewer.md</span>
+        <br>    ├── <span class="file">test-writer.md</span>
+        <br>    └── <span class="file">security-auditor.md</span>
+    </div>
+
+    <h4>Example: Next.js Security Auditor (Domain-Specific)</h4>
+    <pre><code>---
+name: nextjs-security-auditor
+description: Audit Next.js code for security issues specific to App Router patterns. Use after implementing auth, API routes, or server actions.
+tools: Read, Grep, Glob
+model: sonnet
+---
+
+You are a Next.js App Router security specialist. You know vulnerabilities 
+that generic code review misses.
+
+## Next.js-Specific Security Checks
+
+### Server Actions
+- [ ] Actions use `'use server'` directive at function level, not file level
+- [ ] All inputs validated with Zod BEFORE any database operations
+- [ ] No sensitive data in action return values (gets serialized to client)
+- [ ] Rate limiting on public-facing actions
+
+### API Routes (app/api/)
+- [ ] No secrets in response bodies (check for accidental inclusion)
+- [ ] CORS configured explicitly, not `*`
+- [ ] Auth checked BEFORE any data fetching
+- [ ] Request size limits on file uploads
+
+### Server Components
+- [ ] No `searchParams` used without sanitization (XSS vector)
+- [ ] Dynamic routes validate params before database queries
+- [ ] `cookies()` and `headers()` not leaked to client components
+
+### Middleware
+- [ ] Auth middleware covers all protected routes
+- [ ] No redirect loops possible
+- [ ] Rate limiting on auth endpoints
+
+## Output Format
+```
+SECURITY AUDIT: [component/route name]
+
+🔴 CRITICAL (fix before deploy):
+- [issue + specific file:line + fix]
+
+🟡 WARNINGS:
+- [issue + recommendation]
+
+🟢 PASSED CHECKS:
+- [what looks good]
+```</code></pre>
+
+    <h4>Invoking Subagents</h4>
+    <p>Claude decides when to delegate based on the description, or you can request explicitly:</p>
+    <pre><code># Automatic delegation (Claude decides based on description match)
+"Check this API route for security issues"
+→ Claude may invoke nextjs-security-auditor automatically
+
+# Explicit request
+"Have the nextjs-security-auditor check my auth implementation"
+"Use the prisma-migration-safety agent before I push this schema change"</code></pre>
+
+    <h4>Foreground vs Background Execution</h4>
+    <pre><code># Foreground (blocking) - default
+Claude delegates → waits for result → continues
+
+# Background (concurrent) - Ctrl+Shift+B or explicit request
+"Run this as a background task: analyze the entire codebase"
+Claude continues working while subagent runs</code></pre>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">⚠️ Important Limitation</div>
+        <p>Subagents cannot spawn their own subagents. Don't include <code>Task</code> in a subagent's tools array to prevent delegation loops.</p>
+    </div>
+
+    <h3 id="hooks">2.5 Hooks — Lifecycle Automation</h3>
+
+    <p>Hooks are shell commands that run automatically at specific lifecycle events. They transform reactive development into proactive automation.</p>
+
+    <h4>Hook Events</h4>
+    <table>
+        <tr>
+            <th>Event</th>
+            <th>When It Fires</th>
+            <th>Can Block?</th>
+            <th>Use Cases</th>
+        </tr>
+        <tr>
+            <td><code>SessionStart</code></td>
+            <td>Session begins</td>
+            <td>No</td>
+            <td>Load context, inject state</td>
+        </tr>
+        <tr>
+            <td><code>UserPromptSubmit</code></td>
+            <td>Before processing prompt</td>
+            <td>Yes (exit 2)</td>
+            <td>Validate prompts, add context</td>
+        </tr>
+        <tr>
+            <td><code>PreToolUse</code></td>
+            <td>Before tool execution</td>
+            <td>Yes (exit 2)</td>
+            <td>Block dangerous commands, validate inputs</td>
+        </tr>
+        <tr>
+            <td><code>PostToolUse</code></td>
+            <td>After successful tool</td>
+            <td>No</td>
+            <td>Format code, run tests, commit</td>
+        </tr>
+        <tr>
+            <td><code>PermissionRequest</code></td>
+            <td>Tool requests permission</td>
+            <td>Yes</td>
+            <td>Auto-approve/deny specific tools</td>
+        </tr>
+        <tr>
+            <td><code>Stop</code></td>
+            <td>Agent finishes responding</td>
+            <td>Yes (exit 2)</td>
+            <td>Verify completion, final commits</td>
+        </tr>
+        <tr>
+            <td><code>SubagentStop</code></td>
+            <td>Subagent finishes</td>
+            <td>Yes (exit 2)</td>
+            <td>Validate subagent output</td>
+        </tr>
+        <tr>
+            <td><code>Notification</code></td>
+            <td>Claude sends alert</td>
+            <td>No</td>
+            <td>Desktop/Slack notifications</td>
+        </tr>
+    </table>
+
+    <h4>Configuration Location</h4>
+    <pre><code># .claude/settings.json
+{
+  "hooks": {
+    "PreToolUse": [ ... ],
+    "PostToolUse": [ ... ],
+    "Stop": [ ... ]
+  }
+}</code></pre>
+
+    <h4>Example: Auto-Format After Edits</h4>
+    <pre><code>{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$file_path\""
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+    <h4>Example: Block Dangerous Commands</h4>
+    <pre><code>#!/bin/bash
+# .claude/hooks/pre-bash-firewall.sh
+set -euo pipefail
+
+cmd=$(jq -r '.tool_input.command // ""')
+
+# Block dangerous patterns
+if echo "$cmd" | grep -qE 'rm -rf|git reset --hard|DROP TABLE'; then
+    echo "Blocked potentially dangerous command: $cmd" >&2
+    exit 2  # Exit 2 = block action
+fi
+
+exit 0  # Exit 0 = allow action</code></pre>
+
+    <pre><code>{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-bash-firewall.sh"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+    <h4>Example: Run Tests After Code Changes</h4>
+    <pre><code>{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$file_path\" == *.test.* ]]; then pnpm test --reporter=dot; fi"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+    <h4>Prompt-Based Hooks (LLM Evaluation)</h4>
+    <p>Instead of shell commands, use an LLM to evaluate whether to allow an action:</p>
+    <pre><code>{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Evaluate if all tasks are complete: $ARGUMENTS. Respond with {\"decision\": \"allow\"} or {\"decision\": \"block\", \"message\": \"reason\"}."
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+    <h3 id="mcp">2.6 MCP Servers — External Tool Integration</h3>
+
+    <p>The Model Context Protocol (MCP) connects Claude Code to external tools and services—GitHub, Slack, databases, Jira, and more—without custom integrations.</p>
+
+    <h4>MCP Server Scopes</h4>
+    <table>
+        <tr>
+            <th>Scope</th>
+            <th>Location</th>
+            <th>Use Case</th>
+        </tr>
+        <tr>
+            <td>User</td>
+            <td><code>~/.claude.json</code></td>
+            <td>Personal servers across all projects</td>
+        </tr>
+        <tr>
+            <td>Project</td>
+            <td><code>.mcp.json</code></td>
+            <td>Team-shared servers (version controlled)</td>
+        </tr>
+        <tr>
+            <td>Local</td>
+            <td><code>~/.claude.json</code> under project path</td>
+            <td>Personal servers for current project only</td>
+        </tr>
+    </table>
+
+    <h4>Adding MCP Servers</h4>
+    <pre><code># Via CLI
+claude mcp add github --scope user -- npx -y @modelcontextprotocol/server-github
+claude mcp add --env GITHUB_TOKEN=ghp_xxx
+
+# Via JSON (~/.claude.json or .mcp.json)
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_xxx"
+      }
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    }
+  }
+}</code></pre>
+
+    <h4>Popular MCP Servers</h4>
+    <ul style="color: var(--text-secondary); margin-left: 1.5rem; margin-bottom: 1rem;">
+        <li><strong>GitHub:</strong> Manage PRs, issues, repos</li>
+        <li><strong>Slack:</strong> Send messages, read channels</li>
+        <li><strong>Linear/Jira:</strong> Issue tracking integration</li>
+        <li><strong>Perplexity:</strong> Web search capabilities</li>
+        <li><strong>Context7:</strong> Up-to-date library documentation</li>
+        <li><strong>Sequential Thinking:</strong> Complex reasoning tasks</li>
+        <li><strong>Filesystem:</strong> Enhanced file operations</li>
+    </ul>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">⚠️ Context Window Warning</div>
+        <p>MCP tool definitions consume context. Keep under 10 MCPs enabled. Use <code>disabledMcpServers</code> in project config to disable unused ones. Claude Code auto-enables Tool Search when tools exceed 10% of context.</p>
+    </div>
+
+    <h4>Using MCP Resources</h4>
+    <p>Type <code>@</code> in your prompt to see available MCP resources alongside files:</p>
+    <pre><code>@github:issues  # Reference GitHub issues
+@slack:channel  # Reference Slack channels</code></pre>
+
+    <h3 id="plugins">2.7 Plugins — Bundled Distribution</h3>
+
+    <p>Plugins package multiple extensions (commands, agents, skills, hooks, MCP servers) into installable units. They solve the distribution problem—share complete configurations with one command.</p>
+
+    <h4>Plugin Structure</h4>
+    <div class="file-tree">
+        <span class="dir">my-plugin/</span>
+        <br>├── <span class="dir">.claude-plugin/</span>
+        <br>│   └── <span class="file">plugin.json</span>
+        <br>├── <span class="dir">commands/</span>
+        <br>│   └── <span class="file">review.md</span>
+        <br>├── <span class="dir">agents/</span>
+        <br>│   └── <span class="file">code-reviewer.md</span>
+        <br>├── <span class="dir">skills/</span>
+        <br>│   └── <span class="dir">api-design/</span>
+        <br>│       └── <span class="file">SKILL.md</span>
+        <br>├── <span class="dir">hooks/</span>
+        <br>│   └── <span class="file">hooks.json</span>
+        <br>└── <span class="file">.mcp.json</span>
+    </div>
+
+    <h4>plugin.json Manifest</h4>
+    <pre><code>{
+  "name": "devjourney-toolkit",
+  "version": "1.0.0",
+  "description": "Development tools for DevJourney.ai",
+  "author": {
+    "name": "Justin",
+    "email": "justin@devjourney.ai"
+  },
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    }
+  }
+}</code></pre>
+
+    <h4>Installing Plugins</h4>
+    <pre><code># Add a marketplace
+/plugin marketplace add anthropics/claude-plugins-official
+/plugin marketplace add ivan-magda/claude-superpowers
+
+# Install from marketplace
+/plugin install devjourney-toolkit@my-marketplace
+
+# List installed plugins
+/plugin list
+
+# Manage plugins
+/plugin  # Opens interactive menu</code></pre>
+
+    <h4>Creating a Marketplace</h4>
+    <pre><code># marketplace.json
+{
+  "name": "my-team-plugins",
+  "description": "Internal development plugins",
+  "plugins": [
+    {
+      "name": "devjourney-toolkit",
+      "description": "Core development tools",
+      "version": "1.0.0",
+      "source": {
+        "type": "github",
+        "repo": "my-org/devjourney-toolkit"
+      }
+    }
+  ]
+}</code></pre>
+
+    <h2 id="comparison">3. Feature Comparison Matrix</h2>
+
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Invocation</th>
+            <th>Context</th>
+            <th>Best For</th>
+        </tr>
+        <tr>
+            <td>CLAUDE.md</td>
+            <td>Auto-loaded at session start</td>
+            <td>Main conversation</td>
+            <td>Project conventions, always-needed context</td>
+        </tr>
+        <tr>
+            <td>Commands</td>
+            <td>Manual via <code>/command</code></td>
+            <td>Main conversation</td>
+            <td>Explicit, repeatable workflows</td>
+        </tr>
+        <tr>
+            <td>Skills</td>
+            <td>Auto when task matches description</td>
+            <td>Main or forked</td>
+            <td>On-demand expertise, context efficiency</td>
+        </tr>
+        <tr>
+            <td>Subagents</td>
+            <td>Auto or explicit request</td>
+            <td>Isolated window</td>
+            <td>Heavy exploration, parallel work</td>
+        </tr>
+        <tr>
+            <td>Hooks</td>
+            <td>Auto on lifecycle events</td>
+            <td>External scripts</td>
+            <td>Automation, validation, quality gates</td>
+        </tr>
+        <tr>
+            <td>MCP Servers</td>
+            <td>Available when configured</td>
+            <td>External services</td>
+            <td>Tool integration (GitHub, Slack, etc.)</td>
+        </tr>
+        <tr>
+            <td>Plugins</td>
+            <td>Installed once</td>
+            <td>Bundles everything</td>
+            <td>Distribution, team standardization</td>
+        </tr>
+    </table>
+
+    <h2 id="workflow">4. Progressive Workflow Example: Migrating a Legacy Monolith</h2>
+
+    <p>Let's build a sophisticated development workflow step-by-step, discovering limitations and addressing them with each extensibility feature. <strong>Each addition fills a gap that Claude Code doesn't provide out of the box</strong>—we're not recreating built-in functionality.</p>
+
+    <div class="callout callout-info">
+        <div class="callout-title">📋 Scenario: Legacy Migration</div>
+        <p>Your company has a 10-year-old Node.js monolith that needs modernization. You're migrating from <strong>Express + jQuery + raw SQL + callbacks</strong> to <strong>Next.js App Router + React + Prisma + async/await</strong>. The migration will take months, so legacy and modern code must coexist—and you need to prevent legacy patterns from creeping into new code.</p>
+    </div>
+
+    <div class="workflow-step" data-step="Step 1: Basic Chat">
+        <h4>Starting Point: Simple Conversation</h4>
+        <pre><code>You: "Migrate the user profile page from Express to Next.js"
+
+Claude: [reads existing code in /src/routes/profile.js]
+        [writes new code... but copies patterns it saw]
+
+// Claude's output - it learned from your legacy code 😬
+const mysql = require('mysql');  // ❌ Should use Prisma
+app.get('/profile', function(req, res) {  // ❌ Should be App Router
+  db.query('SELECT * FROM users WHERE id = ?', [req.params.id], 
+    function(err, results) {  // ❌ Should be async/await
+      if (err) return res.status(500).send(err);
+      res.render('profile', { user: results[0] });  // ❌ Should be React
+    });
+});</code></pre>
+
+        <div class="limitation">
+            <strong>🚫 Limitation Discovered:</strong> Claude sees legacy patterns in your codebase and copies them. It doesn't know which patterns are "old" (to avoid) versus "new" (to follow). Your migration rules are invisible to it.
+        </div>
+    </div>
+
+    <div class="workflow-step" data-step="Step 2: Add CLAUDE.md">
+        <h4>Solution: Document the Migration Rules</h4>
+        <p>CLAUDE.md encodes YOUR specific migration—what's legacy, what's modern, and where each lives:</p>
+        <pre><code># CLAUDE.md
+## 🚨 ACTIVE MIGRATION: Legacy Monolith → Modern Stack
+
+This codebase is mid-migration. Legacy and modern code coexist.
+**CRITICAL: Never use legacy patterns in new code.**
+
+### Directory Structure
+```
+/src
+  /legacy      # ❌ OLD - Do not add new code here
+    /routes    # Express routes (being migrated)
+    /views     # EJS templates (being migrated)  
+    /models    # Raw SQL queries (being migrated)
+  /app         # ✅ NEW - All new code goes here (Next.js App Router)
+  /components  # ✅ NEW - React components
+  /lib         # ✅ NEW - Shared utilities (Prisma, etc.)
+```
+
+### Pattern Migration Reference
+
+| Legacy (NEVER use in /app or /components) | Modern (ALWAYS use) |
+|------------------------------------------|---------------------|
+| `require()` | `import` |
+| `var` | `const` / `let` |
+| `function(callback)` | `async/await` |
+| `mysql.query('SELECT...')` | `prisma.user.findMany()` |
+| `app.get('/route')` | `app/route/page.tsx` or `route.ts` |
+| `res.render('template')` | React components |
+| `$.ajax()` / jQuery | `fetch()` or server actions |
+| `req.session` | `next-auth` session |
+| `module.exports` | `export` / `export default` |
+
+### Migration Commands
+- `pnpm migrate:check` - Show migration progress (% complete)
+- `pnpm legacy:find [pattern]` - Find legacy usage in codebase
+- `pnpm test:legacy` - Run legacy test suite
+- `pnpm test:modern` - Run modern test suite (Vitest)
+
+### File Naming
+- Legacy: `camelCase.js` (e.g., `userProfile.js`)
+- Modern: `kebab-case.tsx` (e.g., `user-profile.tsx`)
+
+### When Migrating a Feature
+1. Create new implementation in /app or /components
+2. Add redirect from legacy route to new route
+3. Mark legacy file with `// @deprecated - migrated to /app/[path]`
+4. Update MIGRATION_STATUS.md
+5. DO NOT delete legacy code until QA confirms parity</code></pre>
+
+        <div class="solution">
+            <strong>✅ Result:</strong> Claude now understands the migration context. It knows `/src/legacy` is old code to learn from but not copy, and `/app` is where modern patterns belong.
+        </div>
+
+        <div class="limitation">
+            <strong>🚫 New Limitation:</strong> Migrating each feature involves the same multi-step process (create new, add redirect, mark deprecated, update status). You keep re-explaining it.
+        </div>
+    </div>
+
+    <div class="workflow-step" data-step="Step 3: Add Slash Commands">
+        <h4>Solution: Encode Your Migration Workflow</h4>
+        <p>Create commands for YOUR specific migration process:</p>
+        
+        <pre><code># .claude/commands/migrate.md
+---
+description: Migrate a legacy feature to the modern stack
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash(git *)
+---
+
+# Migrate Feature: $ARGUMENTS
+
+## Phase 1: Understand Legacy Implementation
+1. Find the legacy code: `grep -r "$ARGUMENTS" src/legacy/`
+2. Read the legacy implementation completely
+3. Document what it does:
+   - Route(s) handled
+   - Database queries made
+   - Session/auth requirements
+   - External API calls
+
+## Phase 2: Plan Modern Implementation  
+Map legacy → modern:
+- Express route → Next.js App Router page or API route
+- Raw SQL → Prisma query
+- EJS template → React component
+- jQuery AJAX → Server action or fetch
+- req.session → next-auth getServerSession()
+
+## Phase 3: Implement Modern Version
+Create files in the correct locations:
+- Pages: `/app/[feature]/page.tsx`
+- API routes: `/app/api/[feature]/route.ts`
+- Components: `/components/[feature]/`
+- Prisma queries: Use existing models in `/prisma/schema.prisma`
+
+## Phase 4: Bridge Legacy → Modern
+Add redirect in legacy route:
+```javascript
+// In legacy route file, add at top:
+// @deprecated - migrated to /app/$ARGUMENTS
+// TODO: Remove after 2024-XX-XX
+
+router.get('/old-path', (req, res) => {
+  res.redirect(301, '/new-path');
+});
+```
+
+## Phase 5: Update Tracking
+1. Update MIGRATION_STATUS.md with:
+   - Feature name
+   - Legacy file(s) deprecated
+   - New file(s) created
+   - Migration date
+   - Your name
+
+2. Commit with message: `migrate($ARGUMENTS): move from Express to App Router`</code></pre>
+
+        <pre><code># .claude/commands/migration-status.md
+---
+description: Check overall migration progress
+allowed-tools: Read, Bash(find *, grep *, wc *)
+---
+
+# Migration Progress Report
+
+## Count Files by Location
+```bash
+echo "=== Legacy Files ==="
+find src/legacy -name "*.js" | wc -l
+
+echo "=== Modern Files ==="  
+find app -name "*.tsx" -o -name "*.ts" | wc -l
+
+echo "=== Deprecated (marked for removal) ==="
+grep -r "@deprecated" src/legacy --include="*.js" -l | wc -l
+```
+
+## Find Remaining Legacy Patterns in Modern Code
+Check for contamination:
+```bash
+echo "=== require() in /app (should be 0) ==="
+grep -r "require(" app/ --include="*.ts" --include="*.tsx" | wc -l
+
+echo "=== var declarations in /app (should be 0) ==="
+grep -r "var " app/ --include="*.ts" --include="*.tsx" | wc -l
+
+echo "=== Raw SQL in /app (should be 0) ==="
+grep -rE "SELECT|INSERT|UPDATE|DELETE" app/ --include="*.ts" | wc -l
+```
+
+## Output Summary
+Format as:
+```
+📊 MIGRATION STATUS
+├── Legacy files remaining: X
+├── Modern files created: Y  
+├── Files marked deprecated: Z
+├── Legacy contamination issues: N
+└── Estimated progress: X%
+```</code></pre>
+
+        <p>Usage: <code>/migrate user-profile</code> or <code>/migration-status</code></p>
+
+        <div class="solution">
+            <strong>✅ Result:</strong> Migration workflow is now a single command. Every migration follows the same structured process with proper deprecation marking and status tracking.
+        </div>
+
+        <div class="limitation">
+            <strong>🚫 New Limitation:</strong> Despite the CLAUDE.md rules, Claude occasionally still uses legacy patterns in new code—especially subtle ones like callback-style error handling or old import syntax. You need active enforcement.
+        </div>
+    </div>
+
+    <div class="workflow-step" data-step="Step 4: Add Subagents">
+        <h4>Solution: Create Migration-Specific Reviewers</h4>
+        <p>These agents have knowledge Claude doesn't have by default—YOUR specific legacy patterns and YOUR modernization targets:</p>
+        
+        <pre><code># .claude/agents/legacy-pattern-detector.md
+---
+name: legacy-pattern-detector
+description: Scan code for legacy patterns that shouldn't exist in modern code. Use AFTER writing any code in /app or /components.
+tools: Read, Grep, Glob
+model: haiku
+---
+
+You are a legacy code detector for our Express→Next.js migration.
+You know OUR SPECIFIC legacy patterns (not generic bad practices).
+
+## Patterns to Flag in /app and /components
+
+### 🔴 CRITICAL (Must Fix)
+```javascript
+// OLD: CommonJS imports
+const x = require('...')     // → import x from '...'
+module.exports = ...         // → export default / export
+
+// OLD: Callback patterns  
+function(err, result) { }    // → async/await
+.then().catch()              // → try/catch with await
+
+// OLD: Raw SQL
+db.query('SELECT ...')       // → prisma.model.findMany()
+mysql.                       // → Should not exist in modern code
+pg.                          // → Should not exist in modern code
+
+// OLD: Express patterns
+app.get(                     // → App Router page.tsx or route.ts
+res.render(                  // → React component return
+res.json(                    // → NextResponse.json()
+req.session                  // → getServerSession()
+```
+
+### 🟡 WARNING (Should Fix)
+```javascript
+// Deprecated syntax
+var x = ...                  // → const or let
+function name() { }          // → const name = () => { } (preference)
+
+// jQuery remnants  
+$('.selector')               // → React refs or state
+$.ajax                       // → fetch or server action
+
+// Old file references
+from '../legacy/             // → Should not import from legacy
+from '../../src/legacy/      // → Modernize the import
+```
+
+## Scan Process
+1. Glob for all .ts and .tsx files in /app and /components
+2. Grep each file for patterns above
+3. Report findings with file:line references
+
+## Output Format
+```
+LEGACY PATTERN SCAN
+
+🔴 CRITICAL ISSUES (X found):
+  - app/profile/page.tsx:24 - require() usage
+  - components/Header.tsx:8 - callback pattern
+
+🟡 WARNINGS (X found):
+  - app/api/users/route.ts:15 - var declaration
+
+✅ CLEAN FILES: X files with no legacy patterns
+```</code></pre>
+
+        <pre><code># .claude/agents/migration-validator.md
+---
+name: migration-validator
+description: Validate that a migrated feature has full parity with legacy. Use AFTER completing a migration before marking legacy as deprecated.
+tools: Read, Grep, Glob, Bash(curl *, pnpm test*)
+model: sonnet
+---
+
+You are a migration parity validator. Your job is to ensure the modern 
+implementation does EVERYTHING the legacy implementation did.
+
+## Validation Process
+
+### Step 1: Extract Legacy Behavior
+Read the legacy file and document:
+- All routes/endpoints handled
+- All query parameters accepted
+- All database operations performed
+- All session/auth checks
+- All response formats (JSON structure, status codes)
+- All error handling cases
+
+### Step 2: Verify Modern Implementation
+For each legacy behavior, confirm the modern code:
+- [ ] Handles the same route (or has redirect from old route)
+- [ ] Accepts the same parameters
+- [ ] Returns the same data structure
+- [ ] Has equivalent auth checks
+- [ ] Handles the same error cases
+
+### Step 3: Test Parity
+If tests exist:
+```bash
+# Run legacy tests against new implementation
+LEGACY_COMPAT=true pnpm test:modern --grep "$FEATURE"
+```
+
+### Step 4: Check for Missing Features
+Common things forgotten during migration:
+- Pagination parameters
+- Sort/filter options  
+- Edge cases (empty results, not found, unauthorized)
+- Rate limiting
+- Logging/analytics events
+
+## Output Format
+```
+MIGRATION PARITY CHECK: [feature name]
+
+Legacy file: src/legacy/routes/[file].js
+Modern file: app/[path]/page.tsx
+
+✅ MATCHED BEHAVIORS:
+- GET /profile - renders user profile
+- POST /profile - updates user data
+- Auth check via session
+
+❌ MISSING IN MODERN:
+- Query param: ?include=posts (legacy line 45)
+- Error case: 404 when user deleted (legacy line 67)
+
+⚠️ DIFFERENCES (intentional?):
+- Response format changed: { user } → { data: { user } }
+
+VERDICT: ❌ NOT READY - 2 missing behaviors
+```</code></pre>
+
+        <div class="solution">
+            <strong>✅ Result:</strong> You now have specialists that know YOUR legacy patterns. The detector catches contamination; the validator ensures nothing is lost in migration. These aren't generic code reviewers—they're migration-specific.
+        </div>
+
+        <div class="limitation">
+            <strong>🚫 New Limitation:</strong> You have to remember to run these agents. When you're in flow, you forget—and legacy patterns slip through to PRs.
+        </div>
+    </div>
+
+    <div class="workflow-step" data-step="Step 5: Add Hooks">
+        <h4>Solution: Enforce Migration Rules Automatically</h4>
+        <p>Hooks make the guardrails automatic—you can't accidentally violate migration rules:</p>
+        
+        <pre><code># .claude/settings.json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/block-legacy-in-modern.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/block-modern-in-legacy.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/check-legacy-patterns.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/migration-reminder.sh"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+        <pre><code># .claude/hooks/block-legacy-in-modern.sh
+#!/bin/bash
+# BLOCK legacy patterns from being written to modern directories
+
+file_path=$(jq -r '.tool_input.file_path // ""')
+content=$(jq -r '.tool_input.content // .tool_input.new_str // ""')
+
+# Only check files in modern directories
+if [[ "$file_path" != *"/app/"* && "$file_path" != *"/components/"* ]]; then
+    exit 0
+fi
+
+# Check for legacy patterns
+errors=""
+
+if echo "$content" | grep -qE "require\s*\("; then
+    errors+="❌ require() detected - use 'import' instead\n"
+fi
+
+if echo "$content" | grep -qE "module\.exports"; then
+    errors+="❌ module.exports detected - use 'export' instead\n"
+fi
+
+if echo "$content" | grep -qE "function\s*\([^)]*,\s*(err|error|cb|callback)"; then
+    errors+="❌ Callback pattern detected - use async/await instead\n"
+fi
+
+if echo "$content" | grep -qE "\.query\s*\(|mysql\.|pg\."; then
+    errors+="❌ Raw SQL detected - use Prisma instead\n"
+fi
+
+if echo "$content" | grep -qE "var\s+\w"; then
+    errors+="❌ 'var' detected - use 'const' or 'let' instead\n"
+fi
+
+if echo "$content" | grep -qE "from\s+['\"].*legacy"; then
+    errors+="❌ Import from /legacy detected - migrate the dependency first\n"
+fi
+
+if [ -n "$errors" ]; then
+    echo "🛑 BLOCKED: Legacy patterns in modern code ($file_path)" >&2
+    echo -e "$errors" >&2
+    echo "The migration rules require modern patterns in /app and /components." >&2
+    exit 2  # Block the write
+fi
+
+exit 0</code></pre>
+
+        <pre><code># .claude/hooks/block-modern-in-legacy.sh
+#!/bin/bash
+# BLOCK new feature code from being added to legacy directories
+# (Legacy should only get deprecation notices and redirects)
+
+file_path=$(jq -r '.tool_input.file_path // ""')
+content=$(jq -r '.tool_input.content // .tool_input.new_str // ""')
+
+# Only check files in legacy directory
+if [[ "$file_path" != *"/legacy/"* ]]; then
+    exit 0
+fi
+
+# Allow: deprecation comments and redirects
+if echo "$content" | grep -qE "@deprecated|res\.redirect|301"; then
+    exit 0
+fi
+
+# Block: new feature code in legacy
+# Heuristic: if adding more than 10 lines without @deprecated, probably wrong
+line_count=$(echo "$content" | wc -l)
+if [ "$line_count" -gt 10 ]; then
+    if ! echo "$content" | grep -q "@deprecated"; then
+        echo "⚠️  WARNING: Adding substantial code to legacy directory" >&2
+        echo "   File: $file_path" >&2
+        echo "   New code should go in /app or /components instead." >&2
+        echo "   If this is intentional, add a comment explaining why." >&2
+        # Warning only, don't block (exit 0)
+    fi
+fi
+
+exit 0</code></pre>
+
+        <pre><code># .claude/hooks/check-legacy-patterns.sh
+#!/bin/bash
+# Post-write check: warn about subtle legacy patterns that slipped through
+
+file_path=$(jq -r '.tool_input.file_path // ""')
+
+# Only check modern files
+if [[ "$file_path" != *"/app/"* && "$file_path" != *"/components/"* ]]; then
+    exit 0
+fi
+
+# Check the actual file content after write
+warnings=""
+
+if grep -qE "\.then\s*\(" "$file_path" 2>/dev/null; then
+    warnings+="💡 Consider: .then() found - async/await is preferred\n"
+fi
+
+if grep -qE "res\.json\(" "$file_path" 2>/dev/null; then
+    warnings+="💡 Consider: res.json() is Express - use NextResponse.json()\n"
+fi
+
+if grep -qE "req\.(body|query|params)" "$file_path" 2>/dev/null; then
+    warnings+="💡 Consider: req.* is Express - use Next.js request handling\n"
+fi
+
+if [ -n "$warnings" ]; then
+    echo "📝 Post-write review for $file_path:" >&2
+    echo -e "$warnings" >&2
+fi
+
+exit 0  # Warnings only, don't block</code></pre>
+
+        <pre><code># .claude/hooks/migration-reminder.sh
+#!/bin/bash
+# On session end: remind to update migration status if files changed
+
+# Check if any legacy or app files were modified
+if git diff --name-only 2>/dev/null | grep -qE "^(src/legacy|app)/"; then
+    echo "" >&2
+    echo "📋 Migration session complete. Remember to:" >&2
+    echo "   1. Run: /migration-status (check for legacy contamination)" >&2
+    echo "   2. Update MIGRATION_STATUS.md if you migrated a feature" >&2
+    echo "   3. Commit with: migrate(feature): description" >&2
+fi
+
+exit 0</code></pre>
+
+        <div class="solution">
+            <strong>✅ Result:</strong> Migration rules are now <strong>enforced</strong>, not just documented. You literally cannot write <code>require()</code> or raw SQL in <code>/app</code>—the hook blocks it. Subtle patterns trigger warnings. Session end reminds you to update tracking.
+        </div>
+
+        <div class="limitation">
+            <strong>🚫 New Limitation:</strong> You want to track migration progress in your team's project management tool (Linear/Jira), but Claude can't access it. You also want to query the database to understand what data the legacy code is actually using.
+        </div>
+    </div>
+
+    <div class="workflow-step" data-step="Step 6: Add MCP Servers">
+        <h4>Solution: Connect to Migration Infrastructure</h4>
+        <p>MCP servers let Claude interact with your migration tracking and data:</p>
+        
+        <pre><code># .mcp.json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "postgres": {
+      "command": "npx", 
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}"
+      }
+    },
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "@linear/mcp-server"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+
+        <p>Now Claude can:</p>
+        <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+            <li><strong>Query the database</strong> to understand what data legacy code actually uses (essential for accurate migration)</li>
+            <li><strong>Create/update Linear issues</strong> for migration tracking ("Migrate user-profile: IN PROGRESS")</li>
+            <li><strong>Create PRs</strong> with proper labels (<code>migration</code>, <code>legacy-deprecation</code>)</li>
+            <li><strong>Check existing issues</strong> to avoid duplicate migration work</li>
+        </ul>
+
+        <pre><code>Example interactions now possible:
+
+> "What tables does the legacy profile route actually query?"
+Claude: [Uses postgres MCP to run EXPLAIN on the legacy queries]
+→ "It queries users, user_settings, and user_sessions tables"
+
+> "Create a Linear issue to track migrating the payment flow"
+Claude: [Uses Linear MCP]
+→ Creates issue with migration template, labels, and estimates
+
+> "Show me all open migration issues"  
+Claude: [Uses Linear MCP to search issues with 'migration' label]
+→ Lists remaining migration work with priorities</code></pre>
+
+        <div class="solution">
+            <strong>✅ Result:</strong> Claude can now understand the actual data (not just the code) and integrate with your project tracking. Migration becomes a closed loop: identify → migrate → track → close.
+        </div>
+
+        <div class="limitation">
+            <strong>🚫 New Limitation:</strong> Your team has 5 developers working on the migration. Each one has to manually set up all these configurations—commands, agents, hooks, MCP servers. It takes hours and people make mistakes.
+        </div>
+    </div>
+
+    <div class="workflow-step" data-step="Step 7: Create a Plugin">
+        <h4>Solution: Bundle the Entire Migration Toolkit</h4>
+        <div class="file-tree">
+            <span class="dir">legacy-migration-toolkit/</span>
+            <br>├── <span class="dir">.claude-plugin/</span>
+            <br>│   └── <span class="file">plugin.json</span>
+            <br>├── <span class="dir">commands/</span>
+            <br>│   ├── <span class="file">migrate.md</span>
+            <br>│   └── <span class="file">migration-status.md</span>
+            <br>├── <span class="dir">agents/</span>
+            <br>│   ├── <span class="file">legacy-pattern-detector.md</span>
+            <br>│   └── <span class="file">migration-validator.md</span>
+            <br>├── <span class="dir">hooks/</span>
+            <br>│   └── <span class="file">hooks.json</span>
+            <br>└── <span class="file">.mcp.json</span>
+        </div>
+
+        <pre><code>// .claude-plugin/plugin.json
+{
+  "name": "legacy-migration-toolkit",
+  "version": "1.0.0",
+  "description": "Express→Next.js migration toolkit with pattern enforcement, validation, and tracking",
+  "author": { "name": "Platform Team" },
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}</code></pre>
+
+        <p>New developer onboarding:</p>
+        <pre><code># One command setup
+/plugin marketplace add our-org/internal-plugins
+/plugin install legacy-migration-toolkit@internal
+
+# That's it. They now have:
+# ✓ /migrate and /migration-status commands
+# ✓ Legacy pattern detector agent
+# ✓ Migration parity validator agent
+# ✓ All hooks (blocking + warnings)
+# ✓ MCP connections (after adding env vars)
+
+# They literally CANNOT introduce legacy patterns into /app
+# The hooks will block them</code></pre>
+
+        <div class="solution">
+            <strong>✅ Final Result:</strong> One command gives every developer the complete migration environment. The entire team has identical guardrails. Legacy contamination is impossible. Migration progress is tracked automatically.
+        </div>
+    </div>
+
+    <h3>The Complete Migration Workflow in Action</h3>
+    <pre><code># Developer starts migration work
+$ claude
+
+# CLAUDE.md auto-loads: knows legacy vs modern directories, pattern mappings
+# MCP connects to: GitHub, Postgres, Linear
+# Hooks are active: legacy patterns will be blocked
+
+> "What migration work is still open?"
+
+Claude: [Uses Linear MCP]
+→ "12 features remaining. Highest priority: user-profile, payment-flow"
+
+> /migrate user-profile
+
+Claude:
+1. Finds legacy code in src/legacy/routes/profile.js
+2. [Uses Postgres MCP] → Queries to understand actual data usage
+3. Documents current behavior: routes, params, auth checks
+4. Creates app/profile/page.tsx with modern patterns
+   [PreToolUse hook] → Confirms no legacy patterns
+5. Creates components/profile/ProfileForm.tsx
+   [PreToolUse hook] → Blocks attempt to use require()
+   Claude: "Oops, let me fix that - using import instead"
+6. Adds redirect in legacy file with @deprecated comment
+   [PreToolUse hook] → Allows (redirect + deprecation)
+7. [PostToolUse hook] → Confirms clean write, no warnings
+
+> "Make sure I didn't miss anything"
+
+[migration-validator agent runs]
+→ "✅ All 4 behaviors matched. ❌ Missing: ?tab= query param (line 34)"
+
+Claude: "Good catch - adding tab parameter support..."
+[Fixes the gap]
+
+> "Now check for any legacy contamination"
+
+[legacy-pattern-detector agent runs]  
+→ "✅ CLEAN: 0 legacy patterns in new code"
+
+> /migration-status
+
+Claude: [Runs checks]
+→ "📊 Legacy files: 47 → 46 | Modern files: 89 → 91 | Progress: 66%"
+
+> "Update Linear and create a PR"
+
+Claude: 
+1. [Uses Linear MCP] → Updates issue: "user-profile: DONE"
+2. [Uses GitHub MCP] → Creates PR with:
+   - Title: "migrate(profile): Express → App Router"
+   - Labels: migration, needs-qa
+   - Description: Auto-generated from migration diff
+
+# Session ends
+[Stop hook] → "📋 Remember to update MIGRATION_STATUS.md"</code></pre>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">🎯 Why This Example Works</div>
+        <p>Every extensibility feature solves a <strong>real, project-specific problem</strong>:</p>
+        <ul style="margin: 0.5rem 0 0 1.5rem;">
+            <li><strong>CLAUDE.md</strong>: Documents YOUR legacy→modern pattern mappings (not generic)</li>
+            <li><strong>Commands</strong>: Encodes YOUR 5-step migration process</li>
+            <li><strong>Subagents</strong>: Know YOUR specific legacy patterns to detect</li>
+            <li><strong>Hooks</strong>: Block YOUR forbidden patterns (require, raw SQL, etc.)</li>
+            <li><strong>MCP</strong>: Connects to YOUR database and YOUR Linear workspace</li>
+            <li><strong>Plugin</strong>: Distributes YOUR team's complete setup</li>
+        </ul>
+        <p>None of this duplicates built-in Claude Code functionality. It's all custom to this migration project.</p>
+    </div>
+
+    <h2 id="advanced">5. Advanced Patterns & Best Practices</h2>
+
+    <h3>Pattern 1: Parallel Subagent Research</h3>
+    <pre><code># .claude/commands/research.md
+---
+description: Research a topic using parallel subagents
+---
+
+Launch parallel research agents for: $ARGUMENTS
+
+## Agents to Spawn (in parallel)
+1. **Codebase Agent** (Explore): Find existing implementations
+2. **Docs Agent** (general-purpose): Search documentation
+3. **Web Agent** (with WebSearch): Find external best practices
+
+Wait for all agents, then synthesize findings into a recommendation.</code></pre>
+
+    <h3>Pattern 2: Skills with Dynamic Context Injection</h3>
+    <pre><code># .claude/skills/pr-context/SKILL.md
+---
+name: pr-summary
+description: Summarize changes in a pull request
+context: fork
+agent: Explore
+allowed-tools: Bash(gh *)
+---
+
+## Pull Request Context
+- PR diff: !`gh pr diff`
+- PR comments: !`gh pr view --comments`
+- Changed files: !`gh pr diff --name-only`
+
+## Your Task
+Analyze this PR and provide:
+1. Summary of changes
+2. Risk assessment
+3. Testing recommendations</code></pre>
+
+    <p>The <code>!`command`</code> syntax runs the command and injects output before Claude sees the prompt.</p>
+
+    <h3>Pattern 3: Permission Auto-Approval</h3>
+    <pre><code># .claude/hooks/auto-approve.sh
+#!/bin/bash
+set -euo pipefail
+
+tool=$(jq -r '.tool_name // ""')
+cmd=$(jq -r '.tool_input.command // ""')
+
+# Auto-approve safe read operations
+if [[ "$tool" == "Read" ]] || [[ "$tool" == "Grep" ]] || [[ "$tool" == "Glob" ]]; then
+    echo '{"decision": "allow"}' 
+    exit 0
+fi
+
+# Auto-approve npm scripts
+if [[ "$cmd" == "pnpm "* ]] || [[ "$cmd" == "npm "* ]]; then
+    echo '{"decision": "allow"}'
+    exit 0
+fi
+
+# Require manual approval for everything else
+echo '{"decision": "ask"}'
+exit 0</code></pre>
+
+    <h3>Pattern 4: Extended Thinking Trigger</h3>
+    <p>Include the word <code>ultrathink</code> in any skill to enable extended thinking mode:</p>
+    <pre><code>---
+name: architecture-review
+description: Deep architecture analysis (ultrathink enabled)
+---
+
+# Architecture Review
+
+Use ultrathink extended reasoning to analyze:
+1. System boundaries and interfaces
+2. Data flow and dependencies
+3. Scalability considerations
+4. Security implications</code></pre>
+
+    <h3>Best Practices Summary</h3>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">✅ Do</div>
+        <ul style="margin: 0; padding-left: 1.5rem;">
+            <li>Keep CLAUDE.md lean—only always-needed context</li>
+            <li>Use subagents for heavy exploration to save context</li>
+            <li>Route simple subagent tasks to Haiku to save cost</li>
+            <li>Use hooks for quality gates (formatting, testing, validation)</li>
+            <li>Limit MCP servers to under 10 to preserve context</li>
+            <li>Write trigger-rich skill descriptions for better auto-matching</li>
+            <li>Keep skill files under 500 lines; reference external docs</li>
+            <li>Test hooks locally before deploying</li>
+        </ul>
+    </div>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">❌ Don't</div>
+        <ul style="margin: 0; padding-left: 1.5rem;">
+            <li>Fill CLAUDE.md with generic instructions like "write clean code"</li>
+            <li>Give subagents the Task tool (prevents delegation loops)</li>
+            <li>Enable all MCP servers at once (context explosion)</li>
+            <li>Use overly broad hook matchers (fires on every operation)</li>
+            <li>Include sensitive credentials in version-controlled files</li>
+            <li>Create skills without clear descriptions (won't be matched)</li>
+        </ul>
+    </div>
+
+    <h2 id="resources">6. Resources & Next Steps</h2>
+
+    <h3>Official Documentation</h3>
+    <ul style="color: var(--text-secondary); margin-left: 1.5rem; margin-bottom: 1rem;">
+        <li><a href="https://code.claude.com/docs/en/memory" style="color: var(--accent-blue);">Memory Management</a> — CLAUDE.md and rules</li>
+        <li><a href="https://code.claude.com/docs/en/skills" style="color: var(--accent-blue);">Skills Documentation</a> — Creating and using skills</li>
+        <li><a href="https://code.claude.com/docs/en/sub-agents" style="color: var(--accent-blue);">Subagents Guide</a> — Creating custom agents</li>
+        <li><a href="https://code.claude.com/docs/en/hooks" style="color: var(--accent-blue);">Hooks Reference</a> — Lifecycle automation</li>
+        <li><a href="https://code.claude.com/docs/en/mcp" style="color: var(--accent-blue);">MCP Servers</a> — External tool integration</li>
+        <li><a href="https://code.claude.com/docs/en/plugin-marketplaces" style="color: var(--accent-blue);">Plugin Marketplaces</a> — Creating and distributing plugins</li>
+    </ul>
+
+    <h3>Community Resources</h3>
+    <ul style="color: var(--text-secondary); margin-left: 1.5rem; margin-bottom: 1rem;">
+        <li><a href="https://github.com/VoltAgent/awesome-claude-code-subagents" style="color: var(--accent-blue);">Awesome Claude Code Subagents</a> — 100+ pre-built agents</li>
+        <li><a href="https://github.com/affaan-m/everything-claude-code" style="color: var(--accent-blue);">Everything Claude Code</a> — Battle-tested configs</li>
+        <li><a href="https://github.com/ChrisWiles/claude-code-showcase" style="color: var(--accent-blue);">Claude Code Showcase</a> — Comprehensive example project</li>
+        <li><a href="https://claudelog.com" style="color: var(--accent-blue);">ClaudeLog</a> — Docs, guides, and best practices</li>
+        <li><a href="https://github.com/anthropics/claude-plugins-official" style="color: var(--accent-blue);">Official Anthropic Plugins</a> — Curated plugin directory</li>
+    </ul>
+
+    <h3>Quick Start Checklist</h3>
+    <ol style="color: var(--text-secondary); margin-left: 1.5rem;">
+        <li>Create <code>CLAUDE.md</code> with your project's tech stack and conventions</li>
+        <li>Add one useful slash command (e.g., <code>/pr-review</code>)</li>
+        <li>Create a code-reviewer subagent for post-implementation checks</li>
+        <li>Add a PostToolUse hook for auto-formatting</li>
+        <li>Connect GitHub MCP for PR management</li>
+        <li>Bundle into a plugin when ready to share with team</li>
+    </ol>
+
+    <div class="callout callout-info" style="margin-top: 2rem;">
+        <div class="callout-title">🚀 Final Thought</div>
+        <p>Claude Code's extensibility transforms it from a coding assistant into a customizable engineering system. Start simple—a CLAUDE.md and one command—then progressively add features as you discover friction points. The goal isn't to use every feature, but to build a workflow that eliminates repetitive tasks and enforces quality automatically.</p>
+    </div>
+
+    <hr style="border-color: var(--border-color); margin: 2rem 0;">
+    <p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+        Generated for Justin • February 2026 • Claude Code Extensibility Mastery Guide
+    </p>
+</body>
+</html>
